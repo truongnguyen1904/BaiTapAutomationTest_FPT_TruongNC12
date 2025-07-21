@@ -29,3 +29,8 @@ jobs:
         name: BuildOutput
         path: |
           **\bin\Release\
+
+    - name: Run Unit Tests
+      run: |
+        vstest.console.exe Tests\bin\Release\Tests.dll
+
