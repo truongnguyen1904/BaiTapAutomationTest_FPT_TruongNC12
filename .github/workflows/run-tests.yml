@@ -18,7 +18,7 @@ jobs:
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '8.0.x'  # Hoặc 7.0.x nếu bạn dùng .NET 7
 
     - name: Install NuGet CLI
       uses: NuGet/setup-nuget@v1
@@ -29,10 +29,16 @@ jobs:
     - name: Build solution
       run: dotnet build BaiTuanTuan3_NguyenChiTruong.sln --configuration Release
 
-    - name: Run tests and output TRX
-      run: dotnet test BaiTuanTuan3_NguyenChiTruong.sln --no-build --configuration Release --logger trx --results-directory TestResults
+    - name: Prepare results folder and run tests
+      run: |
+        mkdir TestResults
+        dotnet test BaiTuanTuan3_NguyenChiTruong.sln `
+          --no-build `
+          --configuration Release `
+          --logger trx `
+          --results-directory TestResults
 
-    - name: Upload TRX report
+    - name: Upload all TRX reports
       uses: actions/upload-artifact@v4
       with:
         name: test-results-trx
@@ -40,9 +46,6 @@ jobs:
 
     - name: Install ReportGenerator
       run: dotnet tool install --global dotnet-reportgenerator-globaltool
-
-    - name: Debug TestResults folder
-      run: dir TestResults
 
     - name: Generate HTML report from TRX
       run: |
