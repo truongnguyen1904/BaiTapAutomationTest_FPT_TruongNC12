@@ -26,23 +26,24 @@ jobs:
       - name: 🛠️ Build solution
         run: dotnet build BaiTuanTuan3_NguyenChiTruong.sln --configuration Release
 
-      - name: 📁 Create TestResults folder (just in case)
-        run: mkdir TestResults
+      - name: 📁 Ensure TestResults directory exists
+        run: mkdir -Force TestResults
 
-      - name: 🧪 Run tests and generate TRX report
-        run: dotnet test BaiTuanTuan3_NguyenChiTruong.sln --no-build --configuration Release --logger trx --results-directory TestResults
+      - name: 🧪 Run tests and output TRX file
+        run: dotnet test BaiTuanTuan3_NguyenChiTruong.sln --no-build --configuration Release --logger "trx;LogFileName=test_results.trx" --results-directory TestResults
 
-      - name: 📂 Check test result files
+      - name: 📂 List TestResults for debug
         run: dir TestResults
 
-      - name: 📨 Upload test report for debug (optional)
+      - name: 📤 Upload test results artifact (for manual download)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-report-trx
-          path: TestResults/
+          name: test-results-trx
+          path: TestResults
 
       - name: ✅ Publish Test Results to GitHub Checks
-        uses: EnricoMi/publish-unit-test-result-action/windows@v2
         if: always()
+        uses: EnricoMi/publish-unit-test-result-action/windows@v2
         with:
-          files: TestResults/**/*.trx
+          files: TestResults/*.trx
