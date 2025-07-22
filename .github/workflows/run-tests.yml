@@ -30,13 +30,13 @@ jobs:
       run: dotnet build BaiTuanTuan3_NguyenChiTruong.sln --configuration Release
 
     - name: Prepare results folder and run tests
+      shell: pwsh
       run: |
-        mkdir TestResults
-        dotnet test BaiTuanTuan3_NguyenChiTruong.sln \
-          --no-build \
-          --configuration Release \
-          --logger trx \
-          --results-directory TestResults
+        # Tạo thư mục nếu chưa có
+        if (-Not (Test-Path TestResults)) { New-Item -ItemType Directory -Path TestResults | Out-Null }
+
+        # Chạy test và xuất TRX vào TestResults
+        dotnet test BaiTuanTuan3_NguyenChiTruong.sln --no-build --configuration Release --logger trx --results-directory TestResults
 
     - name: Upload TRX test report
       uses: actions/upload-artifact@v4
