@@ -1,4 +1,4 @@
-name: CI – Run .NET Tests & Show Result in GitHub UI
+name: CI – Run .NET Tests & Show Results in GitHub UI
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
       - name: 🧰 Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '8.0.x'  # đổi nếu bạn dùng .NET 7 hoặc 6
 
       - name: 📦 Restore NuGet packages
         run: nuget restore BaiTuanTuan3_NguyenChiTruong.sln
@@ -26,24 +26,21 @@ jobs:
       - name: 🛠️ Build solution
         run: dotnet build BaiTuanTuan3_NguyenChiTruong.sln --configuration Release
 
-      - name: 📁 Ensure TestResults directory exists
-        run: mkdir -Force TestResults
-
-      - name: 🧪 Run tests and output TRX file
+      - name: 🧪 Run tests and generate TRX report
         run: dotnet test BaiTuanTuan3_NguyenChiTruong.sln --no-build --configuration Release --logger "trx;LogFileName=test_results.trx" --results-directory TestResults
 
-      - name: 📂 List TestResults for debug
+      - name: 📂 Debug: List TestResults
         run: dir TestResults
 
-      - name: 📤 Upload test results artifact (for manual download)
+      - name: 📤 Upload test results artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-trx
-          path: TestResults
+          name: test-results
+          path: TestResults/test_results.trx
 
-      - name: ✅ Publish Test Results to GitHub Checks
+      - name: ✅ Publish Test Results to GitHub Checks UI
         if: always()
         uses: EnricoMi/publish-unit-test-result-action/windows@v2
         with:
-          files: TestResults/*.trx
+          files: TestResults/test_results.trx
