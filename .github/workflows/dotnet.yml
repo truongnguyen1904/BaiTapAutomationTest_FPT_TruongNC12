@@ -1,4 +1,4 @@
-name: Run .NET Framework Tests and Publish Results
+name: Build and Test .NET Framework with NUnit
 
 on:
   push:
@@ -7,8 +7,7 @@ on:
     branches: [ master ]
   workflow_dispatch:
 
-
-       jobs:
+jobs:
   test:
     runs-on: windows-latest
 
@@ -28,22 +27,22 @@ on:
       - name: Build solution
         run: msbuild BaiTuanTuan3_NguyenChiTruong.sln /p:Configuration=Release
 
-
-      - name: Run tests using VSTest
-        run: >
-          "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\TestPlatform\vstest.console.exe"
-          BaiTuanTuan3_NguyenChiTruong\bin\Release\BaiTuanTuan3_NguyenChiTruong.dll
-          /Logger:trx
-          /ResultsDirectory:TestResults
+      - name: Run tests and generate TRX report
+        run: |
+          mkdir TestResults
+          "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\TestPlatform\vstest.console.exe"^
+            BaiTuanTuan3_NguyenChiTruong\bin\Release\BaiTuanTuan3_NguyenChiTruong.dll ^
+            /Logger:"trx;LogFileName=test_results.trx" ^
+            /ResultsDirectory:TestResults
 
       - name: Upload test report
         uses: actions/upload-artifact@v4
         with:
           name: TestResults
-          path: TestResults/*.trx
+          path: TestResults/test_results.trx
 
       - name: Publish test results to GitHub UI
         uses: EnricoMi/publish-unit-test-result-action/windows@v2
         if: always()
         with:
-          files: TestResults/*.trx
+          files: TestResults/test_results.trx
