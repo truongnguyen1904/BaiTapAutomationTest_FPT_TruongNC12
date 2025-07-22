@@ -18,7 +18,7 @@ jobs:
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'  # hoặc 7.0.x nếu bạn dùng .NET 7
+        dotnet-version: '8.0.x'
 
     - name: Install NuGet CLI
       uses: NuGet/setup-nuget@v1
@@ -30,27 +30,26 @@ jobs:
       run: dotnet build BaiTuanTuan3_NguyenChiTruong.sln --configuration Release
 
     - name: Run tests and generate TRX report
-      run: |
-        mkdir ${{ github.workspace }}/TestResults
-        dotnet test BaiTuanTuan3_NguyenChiTruong.sln `
-          --no-build `
-          --configuration Release `
-          --logger "trx;LogFileName=${{ github.workspace }}/TestResults/test_results.trx"
+      run: dotnet test BaiTuanTuan3_NguyenChiTruong.sln \
+             --no-build \
+             --configuration Release \
+             --logger trx \
+             --results-directory TestResults
 
-    - name: Upload TRX test report
+    - name: Upload all TRX reports
       uses: actions/upload-artifact@v4
       with:
         name: test-results-trx
-        path: TestResults/test_results.trx
+        path: TestResults/*.trx
 
     - name: Install ReportGenerator
       run: dotnet tool install --global dotnet-reportgenerator-globaltool
 
     - name: Generate HTML report from TRX
-      run: reportgenerator `
-        -reports:${{ github.workspace }}/TestResults/test_results.trx `
-        -targetdir:${{ github.workspace }}/TestReport `
-        -reporttypes:Html
+      run: reportgenerator \
+             -reports:TestResults/*.trx \
+             -targetdir:TestReport \
+             -reporttypes:Html
 
     - name: Upload HTML report
       uses: actions/upload-artifact@v4
