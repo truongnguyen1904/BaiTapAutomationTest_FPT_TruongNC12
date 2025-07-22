@@ -1,36 +1,32 @@
-# .github/workflows/run-tests.yml
-name: CI – Run and Annotate Tests
+name: CI – Run Tests & Publish Report
 
 on:
   push:
-    branches: [master]
   pull_request:
-    branches: [master]
   workflow_dispatch:
 
 jobs:
-  build-and-test:
+  test:
     runs-on: windows-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with: { dotnet-version: '8.0.x' }
 
-    - name: Install NuGet CLI
-      uses: NuGet/setup-nuget@v1
+      - name: Restore
+        run: nuget restore BaiTuanTuan3_NguyenChiTruong.sln
 
-    - name: Restore NuGet packages
-      run: nuget restore BaiTuanTuan3_NguyenChiTruong.sln
+      - name: Build
+        run: dotnet build BaiTuanTuan3_NguyenChiTruong.sln --configuration Release
 
-    - name: Build solution
-      run: dotnet build BaiTuanTuan3_NguyenChiTruong.sln --configuration Release
+      - name: Run tests (produce .trx)
+        run: dotnet test BaiTuanTuan3_NguyenChiTruong.sln --no-build --configuration Release --logger trx --results-directory TestResults
 
-    - name: Run and annotate tests
-      shell: pwsh
-      run: |
-        dotnet test BaiTuanTuan3_NguyenChiTruong.sln --no-build --configuration Release --logger github
+      - name: Publish Test Report
+        uses: dorny/test-reporter@v1
+        with:
+          name: VSTest Report
+          path: TestResults/*.trx
+          reporter: vstest
