@@ -29,21 +29,26 @@ jobs:
     - name: Build solution
       run: dotnet build BaiTuanTuan3_NguyenChiTruong.sln --configuration Release
 
-    - name: Run tests and generate TRX report
-      run: |
-        dotnet test BaiTuanTuan3_NguyenChiTruong.sln --no-build --configuration Release --logger trx --results-directory TestResults
+    - name: Run tests and output TRX
+      run: dotnet test BaiTuanTuan3_NguyenChiTruong.sln --no-build --configuration Release --logger trx --results-directory TestResults
 
-    - name: Upload all TRX reports
+    - name: Upload TRX report
       uses: actions/upload-artifact@v4
       with:
         name: test-results-trx
-        path: TestResults/*.trx
+        path: TestResults\*.trx
 
     - name: Install ReportGenerator
       run: dotnet tool install --global dotnet-reportgenerator-globaltool
 
+    - name: Debug TestResults folder
+      run: dir TestResults
+
     - name: Generate HTML report from TRX
-      run: reportgenerator -reports:TestResults/*.trx -targetdir:TestReport -reporttypes:Html
+      run: |
+        reportgenerator "-reports:TestResults\*.trx" `
+                        "-targetdir:TestReport" `
+                        "-reporttypes:Html"
 
     - name: Upload HTML report
       uses: actions/upload-artifact@v4
