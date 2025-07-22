@@ -21,13 +21,14 @@ jobs:
       - name: Restore NuGet packages
         run: nuget restore BaiTuanTuan3_NguyenChiTruong.sln
 
-      - name: Build solution in Release mode
-        run: msbuild BaiTuanTuan3_NguyenChiTruong.sln /p:Configuration=Release
+      - name: Build solution
+        run: |
+          & "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" BaiTuanTuan3_NguyenChiTruong.sln /p:Configuration=Release
 
       - name: Run tests using VSTest
         run: >
           "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\TestPlatform\vstest.console.exe"
-          BaiTuanTuan3_NguyenChiTruong\bin\Release\BaiTuanTuan3_NguyenChiTruong.exe
+          BaiTuanTuan3_NguyenChiTruong\bin\Release\BaiTuanTuan3_NguyenChiTruong.dll
           /Logger:trx
           /ResultsDirectory:TestResults
 
