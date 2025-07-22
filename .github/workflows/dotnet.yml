@@ -1,4 +1,4 @@
-name: Run .NET Tests and Publish Results
+name: Run .NET Framework Tests and Publish Results
 
 on:
   push:
@@ -15,28 +15,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v1
 
       - name: Restore NuGet packages
         run: nuget restore BaiTuanTuan3_NguyenChiTruong.sln
 
-      - name: Build solution
-        run: dotnet build BaiTuanTuan3_NguyenChiTruong.sln --configuration Release
+      - name: Build solution in Release mode
+        run: msbuild BaiTuanTuan3_NguyenChiTruong.sln /p:Configuration=Release
 
-      - name: Run tests and generate TRX report
-        run: dotnet test BaiTuanTuan3_NguyenChiTruong.csproj --no-build --configuration Release --logger "trx;LogFileName=test_results.trx" --results-directory TestResults
+      - name: Run tests using VSTest
+        run: >
+          "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\TestPlatform\vstest.console.exe"
+          BaiTuanTuan3_NguyenChiTruong\bin\Release\BaiTuanTuan3_NguyenChiTruong.exe
+          /Logger:trx
+          /ResultsDirectory:TestResults
 
       - name: Upload test report
         uses: actions/upload-artifact@v4
         with:
           name: TestResults
-          path: TestResults/test_results.trx
+          path: TestResults/*.trx
 
       - name: Publish test results to GitHub UI
         uses: EnricoMi/publish-unit-test-result-action/windows@v2
         if: always()
         with:
-          files: TestResults/test_results.trx
+          files: TestResults/*.trx
