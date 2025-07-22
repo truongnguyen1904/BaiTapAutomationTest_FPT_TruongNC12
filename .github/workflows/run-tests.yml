@@ -1,7 +1,7 @@
 name: Manual Run Tests
 
 on:
-  workflow_dispatch: # Cho phép bấm nút "Run workflow"
+  workflow_dispatch:
 
 jobs:
   build-and-test:
@@ -14,13 +14,16 @@ jobs:
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x' # Hoặc phiên bản bạn đang dùng
+        dotnet-version: '8.0.x'
 
-    - name: Restore dependencies
-      run: dotnet restore
+    - name: Install NuGet
+      uses: NuGet/setup-nuget@v1
+
+    - name: Restore NuGet packages (for packages.config)
+      run: nuget restore BaiTuanTuan3_NguyenChiTruong.sln
 
     - name: Build project
-      run: dotnet build --configuration Release
+      run: dotnet build BaiTuanTuan3_NguyenChiTruong.csproj --configuration Release
 
     - name: Run tests
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test BaiTuanTuan3_NguyenChiTruong.csproj --no-build --verbosity normal
