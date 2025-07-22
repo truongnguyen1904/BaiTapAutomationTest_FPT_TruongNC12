@@ -31,7 +31,6 @@ jobs:
       run: dotnet build BaiTuanTuan3_NguyenChiTruong.sln --configuration Release
 
     - name: Run and annotate tests
-      run: dotnet test BaiTuanTuan3_NguyenChiTruong.sln \
-        --no-build \
-        --configuration Release \
-        --logger github
+      shell: pwsh
+      run: |
+        dotnet test BaiTuanTuan3_NguyenChiTruong.sln --no-build --configuration Release --logger github
