@@ -27,11 +27,20 @@ jobs:
       - name: Build solution
         run: msbuild BaiTuanTuan3_NguyenChiTruong.sln /p:Configuration=Release
 
+      - name: Find vstest.console.exe path
+        id: find-vstest
+        shell: pwsh
+        run: |
+          $vswherePath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $installationPath = & $vswherePath -latest -products * -requires Microsoft.Component.MSBuild -property installationPath
+          $vstestPath = Join-Path $installationPath 'Common7\IDE\Extensions\TestPlatform\vstest.console.exe'
+          echo "VSTEST_PATH=$vstestPath" | Out-File -FilePath $env:GITHUB_ENV -Append
+
       - name: Run tests and generate TRX report
         shell: pwsh
         run: |
           mkdir TestResults
-          & "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\TestPlatform\vstest.console.exe" `
+          & "$env:VSTEST_PATH" `
             "BaiTuanTuan3_NguyenChiTruong\bin\Release\BaiTuanTuan3_NguyenChiTruong.dll" `
             /Logger:"trx;LogFileName=test_results.trx" `
             /ResultsDirectory:TestResults
