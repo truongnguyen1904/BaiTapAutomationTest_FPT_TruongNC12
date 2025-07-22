@@ -27,25 +27,12 @@ jobs:
       - name: Build solution
         run: msbuild BaiTuanTuan3_NguyenChiTruong.sln /p:Configuration=Release
 
-      - name: Find vstest.console.exe
-        id: find-vstest
-        shell: pwsh
-        run: |
-          $vstestPath = Get-ChildItem "C:\Program Files\Microsoft Visual Studio" -Recurse -Filter vstest.console.exe -ErrorAction SilentlyContinue |
-            Where-Object { $_.FullName -like "*TestPlatform\\vstest.console.exe" } |
-            Select-Object -First 1 -ExpandProperty FullName
-          if (-not $vstestPath) {
-            throw "vstest.console.exe not found"
-          }
-          echo "vstest.console.exe found at $vstestPath"
-          echo "vstest_path=$vstestPath" >> $env:GITHUB_OUTPUT
-
       - name: Run tests and generate TRX report
         shell: pwsh
         run: |
           mkdir TestResults
-          & "${{ steps.find-vstest.outputs.vstest_path }}" `
-            BaiTuanTuan3_NguyenChiTruong\bin\Release\BaiTuanTuan3_NguyenChiTruong.dll `
+          & "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\TestPlatform\vstest.console.exe" `
+            "BaiTuanTuan3_NguyenChiTruong\bin\Release\BaiTuanTuan3_NguyenChiTruong.dll" `
             /Logger:"trx;LogFileName=test_results.trx" `
             /ResultsDirectory:TestResults
 
