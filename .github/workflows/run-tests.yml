@@ -5,7 +5,7 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
-  workflow_dispatch: 
+  workflow_dispatch:
 
 jobs:
   build-and-test:
@@ -18,20 +18,34 @@ jobs:
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'  # hoặc 7.0.x nếu bạn đang dùng .NET 7
+        dotnet-version: '8.0.x'
 
     - name: Install NuGet CLI
       uses: NuGet/setup-nuget@v1
 
-    - name: Restore NuGet packages (sử dụng .sln)
+    - name: Restore NuGet packages
       run: nuget restore BaiTuanTuan3_NguyenChiTruong.sln
 
     - name: Build solution
       run: dotnet build BaiTuanTuan3_NguyenChiTruong.sln --configuration Release
 
-    - name: Run tests
-      run: dotnet test BaiTuanTuan3_NguyenChiTruong.sln --no-build --verbosity normal
+    - name: Run tests and generate TRX report
+      run: dotnet test BaiTuanTuan3_NguyenChiTruong.sln --no-build --configuration Release --logger "trx;LogFileName=test_results.trx"
 
-    - name: Run tests and generate report
-      run: dotnet test BaiTuanTuan3_NguyenChiTruong.sln --no-build --verbosity normal --logger "trx;LogFileName=test_results.trx"
+    - name: Upload TRX test report
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-trx
+        path: '**/test_results.trx'
 
+    - name: Install ReportGenerator
+      run: dotnet tool install --global dotnet-reportgenerator-globaltool
+
+    - name: Generate HTML report from TRX
+      run: reportgenerator -reports:**/test_results.trx -targetdir:TestReport -reporttypes:Html
+
+    - name: Upload HTML report
+      uses: actions/upload-artifact@v4
+      with:
+        name: html-report
+        path: TestReport
