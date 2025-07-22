@@ -18,7 +18,7 @@ jobs:
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '8.0.x'  # Đổi thành 7.0.x nếu bạn dùng .NET 7
 
     - name: Install NuGet CLI
       uses: NuGet/setup-nuget@v1
@@ -30,7 +30,9 @@ jobs:
       run: dotnet build BaiTuanTuan3_NguyenChiTruong.sln --configuration Release
 
     - name: Run tests and generate TRX report
-      run: dotnet test BaiTuanTuan3_NguyenChiTruong.sln --no-build --configuration Release --logger "trx;LogFileName=TestResults/test_results.trx"
+      run: |
+        mkdir TestResults
+        dotnet test BaiTuanTuan3_NguyenChiTruong.sln --no-build --configuration Release --logger "trx;LogFileName=TestResults/test_results.trx"
 
     - name: Upload TRX test report
       uses: actions/upload-artifact@v4
