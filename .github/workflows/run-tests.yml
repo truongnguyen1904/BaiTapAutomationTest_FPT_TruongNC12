@@ -1,32 +1,48 @@
+# .github/workflows/run-tests.yml
 name: CI – Run Tests & Publish Report
 
 on:
   push:
+    branches: [master]
   pull_request:
+    branches: [master]
   workflow_dispatch:
 
 jobs:
   test:
     runs-on: windows-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
-        with: { dotnet-version: '8.0.x' }
+        with:
+          dotnet-version: '8.0.x'
 
-      - name: Restore
+      - name: Install NuGet CLI
+        uses: NuGet/setup-nuget@v1
+
+      - name: Restore NuGet packages
         run: nuget restore BaiTuanTuan3_NguyenChiTruong.sln
 
-      - name: Build
+      - name: Build solution
         run: dotnet build BaiTuanTuan3_NguyenChiTruong.sln --configuration Release
 
-      - name: Run tests (produce .trx)
-        run: dotnet test BaiTuanTuan3_NguyenChiTruong.sln --no-build --configuration Release --logger trx --results-directory TestResults
+      - name: Run tests and output JUnit XML
+        shell: pwsh
+        run: |
+          # đảm bảo folder tồn tại
+          if (-Not (Test-Path test-results)) { New-Item -ItemType Directory -Path test-results | Out-Null }
+          dotnet test BaiTuanTuan3_NguyenChiTruong.sln `
+            --no-build `
+            --configuration Release `
+            --logger "junit;LogFilePath=test-results/results.xml"
 
-      - name: Publish Test Report
+      - name: Publish JUnit Test Report
         uses: dorny/test-reporter@v1
         with:
-          name: VSTest Report
-          path: TestResults/*.trx
-          reporter: vstest
+          name: JUnit Report
+          path: test-results/results.xml
+          reporter: junit
