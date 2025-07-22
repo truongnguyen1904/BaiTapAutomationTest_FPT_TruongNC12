@@ -1,0 +1,39 @@
+name: CI – Run .NET Tests & Show Results in GitHub UI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x' # Đổi nếu dùng .NET 7 hoặc 6
+
+      - name: Restore NuGet packages
+        run: nuget restore BaiTuanTuan3_NguyenChiTruong.sln
+
+      - name: Build solution
+        run: dotnet build BaiTuanTuan3_NguyenChiTruong.sln --configuration Release
+
+      - name: Run tests and generate TRX report
+        run: dotnet test BaiTuanTuan3_NguyenChiTruong.sln --no-build --configuration Release --logger "trx;LogFileName=test_results.trx" --results-directory TestResults
+
+      - name: Debug: Show TestResults content
+        run: dir TestResults
+
+      - name: Publish Test Results to GitHub UI
+        uses: EnricoMi/publish-unit-test-result-action/windows@v2
+        if: always()
+        with:
+          files: TestResults/test_results.trx
